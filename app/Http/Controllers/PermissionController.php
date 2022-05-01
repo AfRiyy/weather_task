@@ -7,7 +7,7 @@ use App\Models\User;
 use App\Models\userpermission;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\DB;
-
+use Illuminate\Support\Facades\Gate;
 class PermissionController extends Controller
 {
     /**
@@ -17,9 +17,13 @@ class PermissionController extends Controller
      */
     public function index()
     {
-        $data = $this->getUserData();
-        // return ["permissions" => $data];
-        return view('permission.all', ["permissions" => $data]);
+        if (Gate::allows('set-permission')) {
+        $users = $this->getUserData();
+        return view('permission.all', ["users" => $users]);
+        }
+        else{
+            return redirect('/');
+        }
     }
 
     /**
@@ -49,9 +53,12 @@ class PermissionController extends Controller
      * @param  \App\Models\Permission  $permission
      * @return \Illuminate\Http\Response
      */
-    public function show(Permission $permission)
+    public function show()
     {
-        //
+        // $id = auth()->user()->id;
+        // $permissions = DB::table('userpermissions')->select('permission_id')->where('permission_id','=',1)->where('user_id',$id)->first();
+        // echo "<pre>";
+        // print_r($permissions->permission_id);
     }
 
     /**
@@ -72,9 +79,49 @@ class PermissionController extends Controller
      * @param  \App\Models\Permission  $permission
      * @return \Illuminate\Http\Response
      */
-    public function update(Request $request, Permission $permission)
+    public function update(Request $request, $id)
     {
+        $permissions = $request->all();
+        print("<pre>");
+        print_r($permissions);
+        DB::table('userpermissions')->where('user_id', $id)->delete();
+        if(isset($permissions['set-permission'])){
+            DB::table('userpermissions')->insert(['user_id' => $id, 'permission_id' => 1]);
+        }
+        if(isset($permissions['create-post'])){
+            DB::table('userpermissions')->insert(['user_id' => $id, 'permission_id' => 2]);
+        }
+        if(isset($permissions['update-post'])){
+            DB::table('userpermissions')->insert(['user_id' => $id, 'permission_id' => 3]);
+        }
+        if(isset($permissions['delete-post'])){
+            DB::table('userpermissions')->insert(['user_id' => $id, 'permission_id' => 4]);
+        }
+        return redirect('/permissions');
+        // for ($i=0; $i < count($permissions['permissions']); $i++) {
+        //     print($permissions['permissions'][$i]);
+        // }
+        // foreach($permissions['permissions'] as $element){
+        //     if($element == 'on')
+        //     print($element);
+        // }
         //
+        // for ($i = 0; $i < count($request->permissions); $i++) {
+        //     $keys = array_keys($request->permissions);
+        //     DB::table('userpermissions')->insert(['user_id' => $id, 'permission_id' => $keys[$i] + 1]);
+        // }
+        // return redirect('/permissions');
+
+
+        // if (Gate::allows('set-permission')) {
+        //     $user = User::find($id);
+        //     DB::table('userpermissions')->where('user_id', $id)->delete();
+        //     for ($i = 0; $i < count($request->permissions); $i++) {
+        //         $keys = array_keys($request->permissions);
+        //         DB::table('userpermissions')->insert(['user_id' => $id, 'permission_id' => $keys[$i] + 1]);
+        //     }
+        //     return redirect('/permissions');
+        // }
     }
 
     /**
@@ -98,15 +145,19 @@ class PermissionController extends Controller
     }
     private function readData($user)
     {
-        $permissions = userpermission::where('user_id', $user->id)->get();
-        foreach ($permissions as $permission) {
-            $permissionData[] =  ["permission name" => $permission->permission_id];
-        }
-        $user = array(
+        $set_permission = userpermission::select('permission_id')->where('user_id', $user->id)->where('permission_id',1)->first();
+        $create_post = userpermission::select('permission_id')->where('user_id', $user->id)->where('permission_id',2)->first();
+        $update_post = userpermission::select('permission_id')->where('user_id', $user->id)->where('permission_id',3)->first();
+        $delete_post = userpermission::select('permission_id')->where('user_id', $user->id)->where('permission_id',4)->first();
+
+        $user = (object) array(
             'id' => $user->id,
             'name' => $user->name,
+            'set_permission' => ($set_permission != null ? true : false),
+            'create_post' => ($create_post != null ? true : false),
+            'update_post' => ($update_post != null ? true : false),
+            'delete_post' => ( $delete_post != null ? true : false),
         );
-        $userData = $user + array('permissions' => $permissionData);
-        return $userData;
+        return $user;
     }
 }
