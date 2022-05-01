@@ -43,6 +43,7 @@ class User extends Authenticatable
     ];
     public function permissions()
     {
-        return $this->hasManyThrough(Permission::class, userpermission::class);
+        // return $this->hasManyThrough(Permission::class, userpermission::class);
+        return $this->hasMany(userpermission::class,'user_id','id');
     }
 }
