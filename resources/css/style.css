@@ -1,3 +1,7 @@
-body{
-    background-color: #7fffd4;
+body {
+    background: rgb(28, 121, 9);
+    background: linear-gradient(357deg, rgba(28, 121, 9, 1) 0%, rgba(0, 181, 255, 1) 100%);
+}
+h1{
+    font-size: large;
 }
