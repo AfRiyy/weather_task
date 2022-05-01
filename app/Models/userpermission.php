@@ -12,6 +12,5 @@ class userpermission extends Model
     protected $fillable = [
         "user_id",
         "permission_id",
-        "value"
     ];
 }
