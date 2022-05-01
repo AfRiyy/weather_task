@@ -2,9 +2,8 @@
 @section('title','All permissions')
 
 @section('content')
-<div class="row">
-    <div class="col-8">
-        <h1>Permissions works!</h1>
+<div class="row my-4">
+    <div class="col-12">
         <table class="table">
             <thead>
                 <th>User</th>
@@ -14,19 +13,35 @@
                 <th>Delete post</th>
             </thead>
             <tbody>
-                @foreach ($permissions as $permission)
+
+                @foreach($users as $user)
                 <tr>
-                    <td>{{$permission['name']}}</td>
-                    @if ($permission['permission']['0'] == '1')
-                    <td><input type="checkbox" name="set_permission" id="set_permission"></td>
-                    @else
-                    <td><input type="checkbox" name="set_permission" id="set_permission" checked></td>
-                    @endif
-                    <td><input type="checkbox" name="set_permission" id="set_permission" checked></td>
-                    <td><input type="checkbox" name="set_permission" id="set_permission" checked></td>
-                    <td><input type="checkbox" name="set_permission" id="set_permission" checked></td>
+                    <td>{{$user->name}}</td>
+                    <form action="/permissions/edit/{{$user->id}}" method="post">
+                        @csrf
+                        @method("put")
+                        <td>
+                            <div><input type="checkbox" name="set-permission" @if($user->set_permission){{'checked=checked value=1'}} @endif></div>
+                        </td>
+                        <td>
+                            <div><input type="checkbox" name="create-post" @if($user->create_post){{'checked=checked value=1'}} @endif></div>
+                        </td>
+                        <td>
+                            <div><input type="checkbox" name="update-post" @if($user->update_post){{'checked=checked value=1'}} @endif></div>
+                        </td>
+                        <td>
+                            <div><input type="checkbox" name="delete-post" @if($user->delete_post){{'checked=checked value=1'}} @endif></div>
+                        </td>
+                        @can('set-permission')
+                        <td>
+                            <button type="submit" class="btn btn-outline-info">Edit</button>
+                            <a href="/delete-user/{{$user->id}}" class="btn btn-outline-danger">Delete user</a>
+                        </td>
+                        @endcan
+                    </form>
                 </tr>
                 @endforeach
+
             </tbody>
         </table>
     </div>
